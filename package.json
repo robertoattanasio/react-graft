@@ -1,0 +1,59 @@
+{
+  "name": "react-graft",
+  "version": "1.0.0",
+  "description": "Small state hooks for React, built to be grafted onto: extend an instance, override an action, share it as a context.",
+  "keywords": [
+    "react",
+    "graft",
+    "hooks",
+    "state",
+    "extend",
+    "typescript"
+  ],
+  "license": "MIT",
+  "author": "Roberto Attanasio",
+  "homepage": "https://dev.robertoattanasio.com/react-graft",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robertoattanasio/dev.robertoattanasio.com.git",
+    "directory": "lib/react-graft"
+  },
+  "bugs": {
+    "url": "https://github.com/robertoattanasio/dev.robertoattanasio.com/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "workspaces": [
+    "."
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "ts:check": "tsc --noEmit",
+    "build": "rm -rf dist && tsc",
+    "changeset:add": "changeset",
+    "changeset:bump": "changeset version",
+    "build:release": "npm run ts:check && npm run build && npm pack && changeset publish && git push --follow-tags"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.31.1"
+  }
+}
