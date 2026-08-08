@@ -36,11 +36,17 @@ export const useGraftCounter = ({
     return () => clearInterval(interval);
   }, [isCounting]);
 
-  const start = useCallback(() => {
-    deadlineRef.current = Date.now() + duration * 1000;
-    setCounter(duration);
-    setIsCounting(true);
-  }, [duration]);
+  const start = useCallback(
+    (seconds = duration) => {
+      const next = Math.max(0, seconds);
+      if (!next) return;
+
+      deadlineRef.current = Date.now() + next * 1000;
+      setCounter(next);
+      setIsCounting(true);
+    },
+    [duration],
+  );
 
   const reset = useCallback(() => {
     deadlineRef.current = null;

@@ -3,7 +3,7 @@ export type GraftCounter = {
   counter: number;
   duration: number;
   isCounting: boolean;
-  start: () => void;
+  start: (seconds?: number) => void;
   reset: () => void;
 };
 

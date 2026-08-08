@@ -4,7 +4,7 @@ import { sanitizeSyntheticEvent } from "../../utils/sanitize_event/sanitize_even
 
 import type { GraftDialog, UseGraftDialogOptions } from "./type.js";
 
-export const useGraftDialog = <T,>({ isActiveOnLoad = false }: UseGraftDialogOptions = {}): GraftDialog<T> => {
+export const useGraftDialog = <T>({ isActiveOnLoad = false }: UseGraftDialogOptions = {}): GraftDialog<T> => {
   const id = useId();
   const [isActive, setIsActive] = useState(isActiveOnLoad);
   const storageRef = useRef<T | null>(null);
@@ -15,7 +15,6 @@ export const useGraftDialog = <T,>({ isActiveOnLoad = false }: UseGraftDialogOpt
   }, []);
 
   const close = useCallback(() => {
-    storageRef.current = null;
     setIsActive(false);
   }, []);
 

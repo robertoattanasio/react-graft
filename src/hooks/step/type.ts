@@ -1,13 +1,15 @@
-export type GraftTab = {
+export type GraftStep = {
   id: string;
-  tab: number;
+  step: number;
+  min: number;
+  max: number;
   history: readonly number[];
-  setTab: (tab: number) => void;
+  setStep: (step: number) => void;
   onBack: () => void;
   onNext: () => void;
 };
 
-export type UseGraftTabOptions = {
+export type UseGraftStepOptions = {
   defaultValue?: number;
   min?: number;
   max?: number;

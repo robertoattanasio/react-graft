@@ -11,7 +11,6 @@ export const useGraftAlert = <T,>(): GraftAlert<T> => {
   const resolverRef = useRef<((result: boolean) => void) | null>(null);
 
   const close = useCallback((result = false) => {
-    storageRef.current = null;
     setIsActive(false);
 
     const resolve = resolverRef.current;

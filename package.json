@@ -1,13 +1,13 @@
 {
   "name": "react-graft",
-  "version": "1.0.0",
-  "description": "Small state hooks for React, built to be grafted onto: extend an instance, override an action, share it as a context.",
+  "version": "0.1.0",
+  "description": "A factory that turns a hook into a React context, with a set of small state hooks to put in it.",
   "keywords": [
     "react",
-    "graft",
     "hooks",
+    "context",
+    "provider",
     "state",
-    "extend",
     "typescript"
   ],
   "license": "MIT",
@@ -15,11 +15,10 @@
   "homepage": "https://dev.robertoattanasio.com/react-graft",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/robertoattanasio/dev.robertoattanasio.com.git",
-    "directory": "lib/react-graft"
+    "url": "git+https://github.com/robertoattanasio/react-graft.git"
   },
   "bugs": {
-    "url": "https://github.com/robertoattanasio/dev.robertoattanasio.com/issues"
+    "url": "https://github.com/robertoattanasio/react-graft/issues"
   },
   "type": "module",
   "main": "./dist/index.js",
