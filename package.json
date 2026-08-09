@@ -1,6 +1,6 @@
 {
   "name": "react-graft",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A factory that turns a hook into a React context, with a set of small state hooks to put in it.",
   "keywords": [
     "react",
