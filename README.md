@@ -14,7 +14,7 @@ npm install react-graft
 
 ## Usage
 
-`createGraft` takes a hook and returns a React context augmented with a `Provider` that mounts it and a `use()` that reads it. Whatever the hook accepts becomes a prop on the provider, typed from its own signature.
+`createGraft` takes a hook and returns a `Provider` that mounts it and a `use()` that reads it. The context stays private, so the only way to supply a value is to mount the provider and let the hook produce it. Whatever the hook accepts becomes a prop on the provider, typed from its own signature.
 
 ```tsx
 export const GraftUserDialog = createGraft({
@@ -58,7 +58,7 @@ function useGraft() {
 
 | hook              | holds                                                         |
 | ----------------- | ------------------------------------------------------------- |
-| `useGraftStore`   | a value, with a way back to its default and a way to empty it |
+| `useGraftStore`   | a value, with a way back to the one it started with           |
 | `useGraftDialog`  | whether something is open, and the payload it opened with     |
 | `useGraftAlert`   | a question that resolves with its answer                      |
 | `useGraftStep`    | a position in a sequence, clamped, with its history           |

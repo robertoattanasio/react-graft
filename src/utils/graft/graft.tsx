@@ -1,6 +1,8 @@
 import { createContext, useContext } from "react";
 
-import type { CreateGraftOptions, Graft, GraftInject } from "./type.js";
+import { GRAFT_EMPTY } from "./type.js";
+
+import type { CreateGraftOptions, Graft, GraftEmpty, GraftInject } from "./type.js";
 import type { ReactNode } from "react";
 
 const Inject = ({ inject }: { inject: GraftInject }): null => {
@@ -14,7 +16,7 @@ export const createGraft = <TOptions, TValue>({
   inject = [],
   name = "Graft",
 }: CreateGraftOptions<TOptions, TValue>): Graft<TOptions, TValue> => {
-  const GraftContext = createContext<TValue | null>(null);
+  const GraftContext = createContext<TValue | GraftEmpty>(GRAFT_EMPTY);
   GraftContext.displayName = name;
 
   const Provider = ({ children, ...options }: TOptions & { children?: ReactNode }): ReactNode => {
@@ -32,10 +34,12 @@ export const createGraft = <TOptions, TValue>({
 
   const use = (): TValue => {
     const value = useContext(GraftContext);
-    if (!value) throw new Error(`${name} was read outside its provider.`);
+    if (value === GRAFT_EMPTY) throw new Error(`${name} was read outside its provider.`);
 
     return value;
   };
 
-  return Object.assign(GraftContext, { Provider, use });
+  Provider.displayName = `${name}.Provider`;
+
+  return { Provider, use, displayName: name };
 };
