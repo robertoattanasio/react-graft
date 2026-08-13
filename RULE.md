@@ -24,7 +24,9 @@ Shared logic lives in `utils/`, one folder per concern, with the same split — 
 
 ## What a hook may do
 
-Hold state, and nothing else. No `window`, no `localStorage`, no element, no rendering — a hook that needs any of those is a hook for a different package. Persistence is exposed through options and overrides, never performed.
+Hold state, and nothing else. No `window`, no `localStorage`, no DOM, no rendering — a hook that needs any of those is a hook for a different package.
+
+The package is agnostic of the renderer: it depends on `react`, never on `react-dom`, and nothing in it names a type that belongs to one platform. A ref is state like any other, so a hook may hold one and hand it over; what it may not do is know what will end up inside it. Persistence is exposed through options and overrides, never performed.
 
 Every hook takes a single optional options object with defaults, and returns a flat object. Options that the UI has to read back — a duration, a bound — are returned too, so a caller never writes the same number twice.
 
