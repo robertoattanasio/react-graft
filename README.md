@@ -1,6 +1,8 @@
 # react-graft
 
-A factory that turns a hook into a React context, with a set of small state hooks to put in it.
+Turns a hook into a React context: a `Provider` that mounts it, a `use()` that reads it, and side effects that belong to the provider instead of to whichever component happened to be mounted.
+
+Over a context written by hand it adds three things: provider props typed from the hook's own signature, a context nobody can supply from outside, and `inject`.
 
 Package: [npmjs.com/package/react-graft](https://www.npmjs.com/package/react-graft)
 
@@ -14,71 +16,75 @@ npm install react-graft
 
 ## Usage
 
-`createGraft` takes a hook and returns a `Provider` that mounts it and a `use()` that reads it. The context stays private, so the only way to supply a value is to mount the provider and let the hook produce it. Whatever the hook accepts becomes a prop on the provider, typed from its own signature.
+Write a hook. What it returns is the value; what it accepts becomes a prop on the provider.
 
 ```tsx
-export const GraftUserDialog = createGraft({
-  name: "GraftUserDialog",
-  graft: useGraftDialog<User>,
-});
-
-<GraftUserDialog.Provider>
-  <Toolbar />
-</GraftUserDialog.Provider>;
-
-const dialog = GraftUserDialog.use();
-```
-
-The hook is yours. Write one that composes the hooks you need, spread what you took and override what does not fit — the type follows the object you return.
-
-```tsx
-export const GraftInvoiceDialog = createGraft({
-  name: "GraftInvoiceDialog",
+export const GraftLikes = createGraft({
+  name: "GraftLikes",
   graft: useGraft,
-  inject: [useInject],
 });
 
-function useGraft() {
-  const dialog = useGraftDialog<Invoice>();
-  const discard = GraftDiscard.use();
+function useGraft({ start = 0 }: { start?: number }) {
+  const [value, setValue] = useState(start);
+  const like = useCallback(() => setValue((count) => count + 1), []);
 
-  const close = useCallback(async () => {
-    if (!(await discard.open())) return;
-
-    dialog.close();
-  }, [dialog, discard]);
-
-  return { ...dialog, close };
+  return { value, like };
 }
 ```
 
-`inject` takes hooks, not components. They run inside the provider, each in a component of its own that renders `null`, as siblings of `children` — so an injected effect keeps running when the tree below it unmounts, and the file needs no JSX.
+```tsx
+<GraftLikes.Provider start={10}>
+  <LikeButton />
+</GraftLikes.Provider>;
 
-## Hooks
+const { value, like } = GraftLikes.use();
+```
 
-| hook              | holds                                                         |
-| ----------------- | ------------------------------------------------------------- |
-| `useGraftStore`   | a value, with a way back to the one it started with           |
-| `useGraftDialog`  | whether something is open, and the payload it opened with     |
-| `useGraftAlert`   | a question that resolves with its answer                      |
-| `useGraftStep`    | a position in a sequence, clamped, with its history           |
-| `useGraftCounter` | a countdown measured against the clock                        |
-| `useGraftReload`  | a flag that goes up and comes back down after a delay         |
-| `useGraftAuth`    | a credential and whether it is there                          |
+Two providers are two independent instances. `use()` throws, naming the graft, when it is called outside its provider.
 
-Each returns a plain object and a stable `id` from `useId`.
+## inject
+
+`inject` takes hooks, not components. Each runs inside the provider, in a component of its own that renders `null`, and receives the value the graft produced — the same object `use()` returns.
+
+```tsx
+export const GraftLikes = createGraft({
+  name: "GraftLikes",
+  graft: useGraft,
+  inject: [useInjectTitle],
+});
+
+function useInjectTitle({ value }: { value: number }) {
+  useEffect(() => {
+    document.title = `${value} likes`;
+  }, [value]);
+}
+```
+
+They are siblings of `children`, never wrappers, so an injected effect keeps running when the tree below it unmounts — which is what lets a graft be the thing that reopens what it closed.
+
+## API
+
+`createGraft(options)`
+
+| option   | type                          | default   |                                    |
+| -------- | ----------------------------- | --------- | ---------------------------------- |
+| `graft`  | `(options) => TValue`         | required  | the hook the provider mounts       |
+| `inject` | `((value: TValue) => void)[]` | `[]`      | hooks run inside the provider      |
+| `name`   | `string`                      | `"Graft"` | shown in DevTools and in the error |
+
+Returns `{ Provider, use, displayName }`.
+
+## Notes
+
+- The context is private. Mounting the provider is the only way to supply a value.
+- The value is rebuilt on every render, so every reader wakes when the provider does. Grafts are meant to be many and narrow.
+- Injected hooks run after `children`, in the order of the array.
+- `Graft.use()` and the entries of `inject` are hook names, so `react-hooks/rules-of-hooks` sees them.
+- Nothing here renders, touches the DOM or reaches for a platform API.
 
 ## Built with
 
 React 19 and TypeScript. No dependencies.
-
-## Approach
-
-- **A convention, not a framework.** A hook holds the feature, a provider mounts it, `use()` reads it, `inject` carries its side effects. Past those four names nothing is prescribed.
-- **Logic only.** Nothing here renders, touches the DOM or reaches for a platform API. What a dialog looks like, and when its content leaves the screen, belongs to your UI.
-- **Atomic, never global.** State lives in `useState` and `useRef` where the provider is. Two providers are two instances; unmount one and it is gone, with its effects.
-- **Small on purpose.** Grafts are meant to be many and narrow. Granularity is what decides how much of the tree wakes up when something changes.
-- **Plain React.** No proxies, no compiler, no subscription trick. The rules of hooks apply and the linter enforces them, `use()` included.
 
 Conventions for contributing: [RULE.md](./RULE.md).
 

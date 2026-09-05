@@ -1,5 +1,19 @@
 # react-graft
 
+## 1.0.0
+
+### Major Changes
+
+- react-graft is `createGraft`, and nothing else.
+
+  The eight state hooks — `useGraftStore`, `useGraftAuth`, `useGraftDialog`, `useGraftPopover`, `useGraftAlert`, `useGraftStep`, `useGraftCounter`, `useGraftReload` — are no longer exported, and neither are their types. They were patterns worth writing once, not a library: what the package does is turn a hook into a context, and which hooks those are is the caller's business. The documentation shows them instead, as code you own.
+
+  Migrating: lift the hooks you were using out of the 0.3.0 source into your own project. They depend on nothing but React, so they keep working unchanged.
+
+  `inject` now receives the value. `GraftInject` is `(value: TValue) => void`, typed through `NoInfer<TValue>` so the entries read the value without taking part in inferring it — `TValue` still comes from `graft` and from nowhere else. An injected hook no longer has to name the constant that mounts it, which also removes the trap that made `inject: [useInject]` work only when `useInject` was a hoisted function declaration. Injected hooks that took no argument are unaffected.
+
+  `react-dom` is out of `peerDependencies`. The package never imported it, and now says so.
+
 ## 0.3.0
 
 ### Minor Changes

@@ -5,8 +5,8 @@ import { GRAFT_EMPTY } from "./type.js";
 import type { CreateGraftOptions, Graft, GraftEmpty, GraftInject } from "./type.js";
 import type { ReactNode } from "react";
 
-const Inject = ({ inject }: { inject: GraftInject }): null => {
-  inject();
+const Inject = <TValue,>({ inject, value }: { inject: GraftInject<TValue>; value: TValue }): null => {
+  inject(value);
 
   return null;
 };
@@ -26,7 +26,7 @@ export const createGraft = <TOptions, TValue>({
       <GraftContext value={value}>
         {children}
         {inject.map((injected, index) => (
-          <Inject key={index} inject={injected} />
+          <Inject key={index} inject={injected} value={value} />
         ))}
       </GraftContext>
     );
