@@ -1,5 +1,11 @@
 # react-graft
 
+## 1.0.1
+
+### Patch Changes
+
+- ef9d876: Remove the `development` condition from `exports`. Bundlers in development mode received the TypeScript source instead of the compiled build; every environment now resolves `dist`.
+
 ## 1.0.0
 
 ### Major Changes
