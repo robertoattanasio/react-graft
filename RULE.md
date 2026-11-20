@@ -4,25 +4,43 @@ How react-graft code is written.
 
 ## Files
 
-The package is one function, in a folder of its own:
+The package is one function, plus the state hooks published under `react-graft/hooks`:
 
 ```
 src/
   graft/
-    graft.tsx   the factory
-    type.ts     its options, its return, the empty sentinel
-  index.ts      the only barrel
+    graft.tsx      the factory
+    type.ts        its options, its return, the empty sentinel
+  hooks/
+    <name>/
+      <name>.ts    the hook
+      type.ts      its options and its return
+    index.ts       the barrel of react-graft/hooks
+  utils/
+    <name>/
+      <name>.ts    a helper shared by the hooks, never exported
+  index.ts         the barrel of react-graft
 ```
 
-State hooks, persistence and DOM access belong to the consumer, not to this package.
+The root barrel never imports from `hooks/`: a project that only uses `createGraft` doesn't load them. Persistence and DOM access belong to the consumer, not to this package.
 
 ## Naming
 
-| what   | convention   | example       |
-| ------ | ------------ | ------------- |
-| file   | `snake_case` | `type.ts`     |
-| type   | `Graft*`     | `GraftInject` |
-| helper | `camelCase`  | `createGraft` |
+| what    | convention         | example                 |
+| ------- | ------------------ | ----------------------- |
+| file    | `snake_case`       | `type.ts`               |
+| type    | `Graft*`           | `GraftInject`           |
+| helper  | `camelCase`        | `createGraft`           |
+| hook    | `useGraft*`        | `useGraftDialog`        |
+| options | `UseGraft*Options` | `UseGraftDialogOptions` |
+
+## The hooks
+
+Each hook returns one object, ready to be the `graft` of `createGraft`.
+
+- Every object has an `id` from `useId`.
+- A payload passed to `open` lives in state, so a new `open` on an open dialog re-renders it.
+- A React synthetic event passed as payload becomes `null`, so `onClick={open}` works.
 
 ## The factory
 
