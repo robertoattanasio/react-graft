@@ -62,6 +62,21 @@ function useInjectTitle({ value }: { value: number }) {
 
 They are siblings of `children`, never wrappers, so an injected effect keeps running when the tree below it unmounts — which is what lets a graft be the thing that reopens what it closed.
 
+## Hooks
+
+State hooks ready to be the `graft` of `createGraft`, from their own entry:
+
+```tsx
+import { useGraftDialog } from "react-graft/hooks";
+
+export const SheetGraft = createGraft({
+  name: "SheetGraft",
+  graft: useGraftDialog<string>,
+});
+```
+
+`useGraftAlert`, `useGraftAuth`, `useGraftCounter`, `useGraftDialog`, `useGraftPopover`, `useGraftReload`, `useGraftStep`, `useGraftStore`. Each one has its own page in the [documentation](https://dev.robertoattanasio.com/react-graft). A project that never imports `react-graft/hooks` never loads them.
+
 ## API
 
 `createGraft(options)`

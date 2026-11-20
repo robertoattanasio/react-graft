@@ -1,6 +1,6 @@
 {
   "name": "react-graft",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A factory that turns a hook into a typed React context, with side effects that belong to the provider.",
   "keywords": [
     "react",
