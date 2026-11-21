@@ -1,36 +1,35 @@
 # react-graft
 
-Turns a hook into a React context: a `Provider` that mounts it, a `use()` that reads it, and side effects that belong to the provider instead of to whichever component happened to be mounted.
-
-Over a context written by hand it adds three things: provider props typed from the hook's own signature, a context nobody can supply from outside, and `inject`.
+`react-graft` turns a hook into a typed context with a `Provider` and a `use()` function. The provider runs your hook, and `use()` gives its value to components below it. The provider's props follow the hook's options, so TypeScript checks them for you. You can also attach side effects to the provider, where they keep running even if the components inside it unmount.
 
 Package: [npmjs.com/package/react-graft](https://www.npmjs.com/package/react-graft)
 
 Documentation: [dev.robertoattanasio.com/react-graft](https://dev.robertoattanasio.com/react-graft)
 
-## Install
+## Installation
 
 ```sh
 npm install react-graft
 ```
 
-## Usage
+React 19 is required as a peer dependency.
 
-Write a hook. What it returns is the value; what it accepts becomes a prop on the provider.
+First, define a hook and pass it to `createGraft`:
 
 ```tsx
-export const GraftLikes = createGraft({
-  name: "GraftLikes",
-  graft: useGraft,
-});
+import { createGraft } from "react-graft";
 
-function useGraft({ start = 0 }: { start?: number }) {
+const useLikes = ({ start = 0 }: { start?: number }) => {
   const [value, setValue] = useState(start);
   const like = useCallback(() => setValue((count) => count + 1), []);
 
   return { value, like };
-}
+};
+
+export const GraftLikes = createGraft({ name: "GraftLikes", graft: useLikes });
 ```
+
+Then wrap the components that need the value in the provider, and read it with `use()`:
 
 ```tsx
 <GraftLikes.Provider start={10}>
@@ -40,69 +39,28 @@ function useGraft({ start = 0 }: { start?: number }) {
 const { value, like } = GraftLikes.use();
 ```
 
-Two providers are two independent instances. `use()` throws, naming the graft, when it is called outside its provider.
-
-## inject
-
-`inject` takes hooks, not components. Each runs inside the provider, in a component of its own that renders `null`, and receives the value the graft produced — the same object `use()` returns.
-
-```tsx
-export const GraftLikes = createGraft({
-  name: "GraftLikes",
-  graft: useGraft,
-  inject: [useInjectTitle],
-});
-
-function useInjectTitle({ value }: { value: number }) {
-  useEffect(() => {
-    document.title = `${value} likes`;
-  }, [value]);
-}
-```
-
-They are siblings of `children`, never wrappers, so an injected effect keeps running when the tree below it unmounts — which is what lets a graft be the thing that reopens what it closed.
-
-## Hooks
-
-State hooks ready to be the `graft` of `createGraft`, from their own entry:
-
-```tsx
-import { useGraftDialog } from "react-graft/hooks";
-
-export const SheetGraft = createGraft({
-  name: "SheetGraft",
-  graft: useGraftDialog<string>,
-});
-```
-
-`useGraftAlert`, `useGraftAuth`, `useGraftCounter`, `useGraftDialog`, `useGraftPopover`, `useGraftReload`, `useGraftStep`, `useGraftStore`. Each one has its own page in the [documentation](https://dev.robertoattanasio.com/react-graft). A project that never imports `react-graft/hooks` never loads them.
-
 ## API
 
-`createGraft(options)`
+The guides explain the factory and how to attach side effects to a provider:
 
-| option   | type                          | default   |                                    |
-| -------- | ----------------------------- | --------- | ---------------------------------- |
-| `graft`  | `(options) => TValue`         | required  | the hook the provider mounts       |
-| `inject` | `((value: TValue) => void)[]` | `[]`      | hooks run inside the provider      |
-| `name`   | `string`                      | `"Graft"` | shown in DevTools and in the error |
+- [createGraft](./docs/create-graft.md)
+- [inject](./docs/inject.md): side effects that belong to the provider
 
-Returns `{ Provider, use, displayName }`.
+The package also includes ready-made hooks under `react-graft/hooks`:
 
-## Notes
+- [useGraftAlert](./docs/hooks/alert.md)
+- [useGraftAuth](./docs/hooks/auth.md)
+- [useGraftCounter](./docs/hooks/counter.md)
+- [useGraftDialog](./docs/hooks/dialog.md)
+- [useGraftPopover](./docs/hooks/popover.md)
+- [useGraftReload](./docs/hooks/reload.md)
+- [useGraftStep](./docs/hooks/step.md)
+- [useGraftStore](./docs/hooks/store.md)
 
-- The context is private. Mounting the provider is the only way to supply a value.
-- The value is rebuilt on every render, so every reader wakes when the provider does. Grafts are meant to be many and narrow.
-- Injected hooks run after `children`, in the order of the array.
-- `Graft.use()` and the entries of `inject` are hook names, so `react-hooks/rules-of-hooks` sees them.
-- Nothing here renders, touches the DOM or reaches for a platform API.
+## Scripts
 
-## Built with
-
-React 19 and TypeScript. No dependencies.
-
-Conventions for contributing: [RULE.md](./RULE.md).
+For the available project scripts and what they do, see [docs/scripts.md](./docs/scripts.md).
 
 ## License
 
-[MIT](./LICENSE).
+[MIT](./LICENSE)
