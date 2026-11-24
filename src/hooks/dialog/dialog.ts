@@ -1,6 +1,6 @@
 import { useCallback, useId, useState } from "react";
 
-import { sanitizeSyntheticEvent } from "../../utils/sanitize_event/sanitize_event.js";
+import { sanitizeSyntheticEvent } from "../../utils/sanitize-event/sanitize-event.js";
 
 import type { GraftDialog, UseGraftDialogOptions } from "./type.js";
 

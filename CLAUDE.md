@@ -33,7 +33,7 @@ The root barrel never imports from `hooks/`: a project that only uses `createGra
 
 | What    | Convention         | Example                 |
 | ------- | ------------------ | ----------------------- |
-| file    | snake_case         | `type.ts`               |
+| file    | kebab-case         | `type.ts`               |
 | type    | `Graft*`           | `GraftInject`           |
 | helper  | camelCase          | `createGraft`           |
 | hook    | `useGraft*`        | `useGraftDialog`        |
