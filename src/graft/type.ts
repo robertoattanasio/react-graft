@@ -16,3 +16,12 @@ export type Graft<TOptions, TValue> = {
   use: () => TValue;
   displayName: string;
 };
+
+export type GraftCaller = (...argList: unknown[]) => unknown;
+
+export type GraftStore<TValue> = {
+  value: TValue;
+  snapshot: TValue;
+  caller: Map<string, GraftCaller>;
+  listener: Set<() => void>;
+};

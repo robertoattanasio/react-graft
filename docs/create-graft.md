@@ -28,9 +28,20 @@ Types: `CreateGraftOptions`, `Graft`, `GraftInject`.
 - Each provider is an independent instance of the hook. Two providers, two states.
 - `use()` throws `"<name> was read outside its provider."` outside a provider.
 - The context isn't returned: mounting the provider is the only way to supply a value.
-- The value is passed as it is, and the hook returns a new object on every render: every reader re-renders with the provider. Grafts are meant to be many and narrow.
+- The value is expected to be a plain object. Anything else is provided as it is and compared by identity.
+- `use()` returns a tracked snapshot of the value: a reader re-renders only when a field it read has changed, nested fields included. The provider re-rendering with the same fields re-renders no reader.
+- A function in the value is wrapped once: its identity never changes, and it always calls the function of the latest render. Inline functions in the hook are fine, and so are they in effect dependencies.
 - `Graft.use` and the injected hooks have hook names, so `react-hooks/rules-of-hooks` checks them.
 - Nothing here renders an element, touches the DOM or uses a browser API.
+
+## Tracking
+
+The snapshot `use()` returns is a proxy that records the fields read during render, through [proxy-compare](https://www.npmjs.com/package/proxy-compare).
+
+- Read the fields in the component that needs them: destructuring in render is the usual way.
+- A reader that doesn't read a field, and passes the whole snapshot on, re-renders on every change of the value.
+- A nested object read from the snapshot is tracked too: reading `storage.customer` re-renders only when `customer` changes, not when `storage` is a new object with the same `customer`.
+- The snapshot is a new object whenever a field changes: don't use it as a whole in `memo`, `useMemo` or effect dependencies. Use its fields.
 
 ## Example
 
@@ -40,7 +51,10 @@ A hook from `react-graft/hooks`, with its type argument:
 import { createGraft } from "react-graft";
 import { useGraftDialog } from "react-graft/hooks";
 
-export const GraftSheet = createGraft({ name: "GraftSheet", graft: useGraftDialog<string> });
+export const GraftSheet = createGraft({
+  name: "GraftSheet",
+  graft: useGraftDialog<string>,
+});
 
 <GraftSheet.Provider isActiveOnLoad={false}>
   <Page />

@@ -1,6 +1,6 @@
 # react-graft
 
-`react-graft` turns a hook into a typed context with a `Provider` and a `use()` function. The provider runs your hook, and `use()` gives its value to components below it. The provider's props follow the hook's options, so TypeScript checks them for you. You can also attach side effects to the provider, where they keep running even if the components inside it unmount.
+`react-graft` turns a hook into a typed context with a `Provider` and a `use()` function. The provider runs your hook, and `use()` gives its value to components below it. A component re-renders only when a field it read has changed, with no selectors to write: the value is tracked as you read it. The provider's props follow the hook's options, so TypeScript checks them for you. You can also attach side effects to the provider, where they keep running even if the components inside it unmount.
 
 Package: [npmjs.com/package/react-graft](https://www.npmjs.com/package/react-graft)
 
@@ -38,6 +38,8 @@ Then wrap the components that need the value in the provider, and read it with `
 
 const { value, like } = GraftLikes.use();
 ```
+
+A component that reads only `like` never re-renders when `value` changes. Functions keep their identity across renders, so `useCallback` in the hook is optional.
 
 ## API
 

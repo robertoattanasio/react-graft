@@ -16,7 +16,9 @@ src/
   index.ts           the barrel of react-graft
   graft/
     graft.tsx        the factory
-    type.ts          its options, its return, the empty sentinel
+    graft.hook.ts    the provider's store and the tracked read
+    graft.helper.ts  the store: snapshot, stable callers, listeners
+    type.ts          its options, its return, the store, the empty sentinel
   hooks/
     index.ts         the barrel of react-graft/hooks
     <name>/<name>.ts the hook
@@ -46,7 +48,9 @@ The root barrel never imports from `hooks/`: a project that only uses `createGra
 - The context is never returned, so a value can only come from the hook.
 - An empty context is the `GRAFT_EMPTY` symbol, so `undefined` and `null` are valid values.
 - Each entry of `inject` is a hook, rendered by its own component that returns `null`, as a sibling after `children`.
-- The context value is rebuilt on every render of the provider.
+- The context holds a store that never changes identity. The provider publishes a new snapshot only when a field of the hook's value changed; functions are wrapped once in stable callers that call the latest render's function.
+- `use()` reads the snapshot through `useSyncExternalStore` and returns it as a proxy-compare proxy: a reader re-renders only when a field it read changed. Listeners are notified in a layout effect of the provider.
+- A value that isn't a plain object is published as it is and compared by identity.
 - `inject` is typed `GraftInject<NoInfer<TValue>>`: `TValue` is inferred from `graft` only.
 
 ## Hooks
@@ -62,7 +66,7 @@ Each hook returns one object, ready to be the `graft` of `createGraft`.
 ## Conventions
 
 - Relative imports end in `.js`, types are imported with `import type`.
-- React is a peer dependency. No other dependencies.
+- React is a peer dependency. The only dependency is `proxy-compare`, for the tracked snapshot.
 - No comments in the code unless asked.
 
 ## Adding a hook
