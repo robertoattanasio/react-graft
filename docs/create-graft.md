@@ -40,9 +40,66 @@ The snapshot `use()` returns is a proxy that records the fields read during rend
 
 - Read the fields in the component that needs them: destructuring in render is the usual way.
 - A nested object read from the snapshot is tracked too: reading `storage.customer` re-renders only when `customer` changes, not when `storage` is a new object with the same `customer`.
-- A field read only inside an event handler isn't tracked: the handler sees the value from the component's last render. Read the field in render, or call a function from the hook, which always sees the latest state.
+- A field read only inside an event handler isn't tracked: the handler sees the value from the component's last render. Read the field in render, or call a function from the hook, which always sees the latest state. See the example below.
 - A reader that passes the whole snapshot on, to a child or to `JSON.stringify`, reads every field and re-renders on every change.
 - The snapshot is a new object whenever a field changes: don't use it as a whole in `memo`, `useMemo` or effect dependencies. Use its fields.
+
+### Where you read a field
+
+What counts is where a field is read, not how. Both of these read `position` during render, so both re-render when it changes:
+
+```tsx
+const Position = () => {
+  const { position } = GraftPlayer.use();
+
+  return <span>{position}</span>;
+};
+```
+
+```tsx
+const Position = () => {
+  const player = GraftPlayer.use();
+
+  return <span>{player.position}</span>;
+};
+```
+
+This one reads `position` only when the button is clicked. During render it reads nothing, so it never re-renders, and the click shares the position of its first render:
+
+```tsx
+const ShareButton = () => {
+  const player = GraftPlayer.use();
+
+  return <button onClick={() => share(player.position)}>Share</button>;
+};
+```
+
+Read the field in render, so the component follows it:
+
+```tsx
+const ShareButton = () => {
+  const { position } = GraftPlayer.use();
+
+  return <button onClick={() => share(position)}>Share</button>;
+};
+```
+
+Or let the hook do it with a function, which always sees the latest state and never re-renders the button:
+
+```tsx
+const usePlayer = () => {
+  const [position, setPosition] = useState(0);
+  const shareCurrent = () => share(position);
+
+  return { position, shareCurrent };
+};
+
+const ShareButton = () => {
+  const { shareCurrent } = GraftPlayer.use();
+
+  return <button onClick={shareCurrent}>Share</button>;
+};
+```
 
 ## Publishing
 

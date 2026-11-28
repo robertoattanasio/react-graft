@@ -74,11 +74,68 @@ The tracking is done by [proxy-compare](https://www.npmjs.com/package/proxy-comp
 
 ## Good to know
 
-- **Read in render what you show.** A field that a component reads only inside an event handler isn't tracked, so the handler sees the value from the component's last render. Read the field in render, or call a function from the hook, which always sees the latest state.
+- **Read in render what you use.** A field that a component reads only inside an event handler isn't tracked, so the handler sees the value from the component's last render. Read the field in render, or call a function from the hook, which always sees the latest state. See the example below.
 - **Destructure, don't pass the whole value on.** A component that hands the whole snapshot to a child, or to `JSON.stringify`, reads every field and re-renders on every change.
 - **Don't use the snapshot as a whole in dependencies.** It's a new object whenever a field changes. Put its fields in `useEffect`, `useMemo` and `memo` comparisons instead.
 - **Plain objects only.** The hook should return a plain object. Anything else is provided as it is and compared by identity, as a plain context would.
 - **Concurrent renders.** The provider publishes the new value while it renders, so the components that mount in the same render see it at once. If React throws that render away, in a transition or under Suspense, a reader that re-renders before the next commit can show the discarded value for one render.
+
+### Where you read a field
+
+What counts is where a field is read, not how. Both of these read `position` during render, so both re-render when it changes:
+
+```tsx
+const Position = () => {
+  const { position } = GraftPlayer.use();
+
+  return <span>{position}</span>;
+};
+```
+
+```tsx
+const Position = () => {
+  const player = GraftPlayer.use();
+
+  return <span>{player.position}</span>;
+};
+```
+
+This one reads `position` only when the button is clicked. During render it reads nothing, so it never re-renders, and the click shares the position of its first render:
+
+```tsx
+const ShareButton = () => {
+  const player = GraftPlayer.use();
+
+  return <button onClick={() => share(player.position)}>Share</button>;
+};
+```
+
+Read the field in render, so the component follows it:
+
+```tsx
+const ShareButton = () => {
+  const { position } = GraftPlayer.use();
+
+  return <button onClick={() => share(position)}>Share</button>;
+};
+```
+
+Or let the hook do it with a function, which always sees the latest state and never re-renders the button:
+
+```tsx
+const usePlayer = () => {
+  const [position, setPosition] = useState(0);
+  const shareCurrent = () => share(position);
+
+  return { position, shareCurrent };
+};
+
+const ShareButton = () => {
+  const { shareCurrent } = GraftPlayer.use();
+
+  return <button onClick={shareCurrent}>Share</button>;
+};
+```
 
 ## Side effects in the provider
 
