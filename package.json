@@ -1,18 +1,21 @@
 {
   "name": "react-graft",
   "version": "1.1.0",
-  "description": "A factory that turns a hook into a typed React context, with side effects that belong to the provider.",
+  "description": "Turns a hook into a typed React context where each component re-renders only on the fields it reads, with side effects that belong to the provider.",
   "keywords": [
     "react",
     "hooks",
     "context",
     "provider",
     "side-effects",
-    "typescript"
+    "typescript",
+    "state",
+    "re-render",
+    "proxy"
   ],
   "license": "MIT",
   "author": "Roberto Attanasio",
-  "homepage": "https://dev.robertoattanasio.com/react-graft",
+  "homepage": "https://react-graft.robertoattanasio.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/robertoattanasio/react-graft.git"

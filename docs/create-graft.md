@@ -36,12 +36,19 @@ Types: `CreateGraftOptions`, `Graft`, `GraftInject`.
 
 ## Tracking
 
-The snapshot `use()` returns is a proxy that records the fields read during render, through [proxy-compare](https://www.npmjs.com/package/proxy-compare).
+The snapshot `use()` returns is a proxy that records the fields read during render, through [proxy-compare](https://www.npmjs.com/package/proxy-compare). When the hook's value changes, a reader re-renders only if a field it recorded changed.
 
 - Read the fields in the component that needs them: destructuring in render is the usual way.
-- A reader that doesn't read a field, and passes the whole snapshot on, re-renders on every change of the value.
 - A nested object read from the snapshot is tracked too: reading `storage.customer` re-renders only when `customer` changes, not when `storage` is a new object with the same `customer`.
+- A field read only inside an event handler isn't tracked: the handler sees the value from the component's last render. Read the field in render, or call a function from the hook, which always sees the latest state.
+- A reader that passes the whole snapshot on, to a child or to `JSON.stringify`, reads every field and re-renders on every change.
 - The snapshot is a new object whenever a field changes: don't use it as a whole in `memo`, `useMemo` or effect dependencies. Use its fields.
+
+## Publishing
+
+- The provider computes the snapshot while it renders, so components that mount in the same render, such as children of a provider whose type just changed, read the new value at once.
+- Readers already mounted are notified in a layout effect of the provider, before the browser paints.
+- If React discards a render, in a transition or under Suspense, the store keeps the snapshot of that render until the next commit, and a reader that re-renders in between shows it for one render.
 
 ## Example
 

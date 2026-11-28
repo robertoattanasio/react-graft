@@ -4,7 +4,7 @@ A factory that turns a hook into a typed React context, with side effects that b
 
 ## Docs
 
-- [README.md](./README.md): install, links to the docs.
+- [README.md](./README.md): what it does, install, usage, the tracking rules, upgrading from 1.x, links to the docs.
 - [docs/](./docs/): [create-graft.md](./docs/create-graft.md), [inject.md](./docs/inject.md), one file per hook in `docs/hooks/`, plus [scripts.md](./docs/scripts.md) and [release.md](./docs/release.md).
 
 Read the relevant doc before changing the package. When an option, a field or a behavior changes, update its doc in the same change.
@@ -49,6 +49,7 @@ The root barrel never imports from `hooks/`: a project that only uses `createGra
 - An empty context is the `GRAFT_EMPTY` symbol, so `undefined` and `null` are valid values.
 - Each entry of `inject` is a hook, rendered by its own component that returns `null`, as a sibling after `children`.
 - The context holds a store that never changes identity. The provider publishes a new snapshot only when a field of the hook's value changed; functions are wrapped once in stable callers that call the latest render's function.
+- The snapshot is published while the provider renders, not in an effect: components that mount in the same render must see it, or a provider swapped for another one would give its new children the old value. The cost is the discarded-render case documented in `create-graft.md`. Moving the publish into the layout effect was tried and broke exactly that case.
 - `use()` reads the snapshot through `useSyncExternalStore` and returns it as a proxy-compare proxy: a reader re-renders only when a field it read changed. Listeners are notified in a layout effect of the provider.
 - A value that isn't a plain object is published as it is and compared by identity.
 - `inject` is typed `GraftInject<NoInfer<TValue>>`: `TValue` is inferred from `graft` only.
